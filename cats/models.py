@@ -24,7 +24,7 @@ class Cat(models.Model):
                               on_delete=models.CASCADE)
     # Связь будет описана через вспомогательную модель AchievementCat
     achievements = models.ManyToManyField(
-        Achievement, through='AchievementCat')
+        Achievement, through='AchievementCat', null=True)
 
     def __str__(self):
         return self.name

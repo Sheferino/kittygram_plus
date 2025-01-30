@@ -21,22 +21,23 @@ class OwnerSerializer(serializers.ModelSerializer):
 class CatSerializer(serializers.ModelSerializer):
     # чтобы показывать владельца по строкому представлению
     # owner = serializers.StringRelatedField(read_only=True)
-    achievements = AchievementSerializer(many=True)
+    achievements = AchievementSerializer(many=True, required=False)
 
     class Meta:
         model = Cat
         fields = ('id', 'name', 'color', 'birth_year', 'owner', 'achievements')
 
     def create(self, validated_data):
-        achievements = validated_data.pop('achievements')
+        achievements = validated_data.pop('achievements', None)
 
         cat = Cat.objects.create(**validated_data)
 
-        for achievement in achievements:
-            current_achievement, status = Achievement.objects.get_or_create(
-                **achievement)
-            AchievementCat.objects.create(
-                achievement=current_achievement, cat=cat)
+        if achievements:
+            for achievement in achievements:
+                current_achievement, status = Achievement.objects.get_or_create(
+                    **achievement)
+                AchievementCat.objects.create(
+                    achievement=current_achievement, cat=cat)
 
         return cat
 
@@ -48,11 +49,11 @@ class CatSerializer(serializers.ModelSerializer):
         instance.save()
 
         # cat = Cat.objects.create(**validated_data)
-
-        for achievement in achievements:
-            current_achievement, _ = Achievement.objects.get_or_create(
-                **achievement)
-            AchievementCat.objects.create(
-                achievement=current_achievement, cat=instance)
+        if achievements:
+            for achievement in achievements:
+                current_achievement, _ = Achievement.objects.get_or_create(
+                    **achievement)
+                AchievementCat.objects.create(
+                    achievement=current_achievement, cat=instance)
 
         return instance
